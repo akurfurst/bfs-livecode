@@ -12,17 +12,34 @@ public class Search {
         // System.out.println(visited.contains(a));
         // System.out.println(visited.contains(b));
         // System.out.println(visited.contains(c));
-        Location p = new Location(7,8);
-        System.out.println(p);
-        System.out.println(p.row());
-        System.out.println(p.column());
-        Set<Location> visited = new HashSet<>();
-        visited.add(p);
-        Location q = new Location(7,8);
-        System.out.println(visited.contains(q));
+        // Location p = new Location(7,8);
+        // System.out.println(p);
+        // System.out.println(p.row());
+        // System.out.println(p.column());
+        // Set<Location> visited = new HashSet<>();
+        // visited.add(p);
+        // Location q = new Location(7,8);
+        // System.out.println(visited.contains(q));
+        
+
+
+        char[][] grid = {
+            {'o', 'o', 'o', 'o', 'c', 'w', 'c', 'o'},
+            {'w', 'o', 'o', 'w', 'w', 'c', 'w', 'o'},
+            {'o', 'o', 'o', 'o', 'R', 'w', 'o', 'o'},
+            {'o', 'o', 'w', 'w', 'w', 'o', 'o', 'o'},
+            {'o', 'o', 'o', 'o', 'c', 'o', 'o', 'o'}
+        };
+
+        System.out.println(nearestCheese(grid));
+
+
     }
 
      /**
+      * 
+      * TODO: change comments to reflect that we are returning the path istead of the final location now
+      * 
      * Finds the location of the nearest reachable cheese from the rat's position.
      * Returns a 2-element int array: [row, col] of the closest 'c'. If there are multiple
      * cheeses that are tied for the same shortest distance to reach, return
@@ -51,18 +68,36 @@ public class Search {
      * @throws CrowdedMazeException if there is more than one rat in the maze
      * @throws HungryRatException if there is no reachable cheese
      */
-    public static int[] nearestCheese(char[][] maze) throws EscapedRatException, CrowdedMazeException, HungryRatException {
+    public static List<Location> nearestCheese(char[][] maze) throws EscapedRatException, CrowdedMazeException, HungryRatException {
         Queue<Location> seen = new ArrayDeque<>();
         Set<Location> visited = new HashSet<>();
+
+        Map<Location, Location> prev = new HashMap<>();
+        List<Location> path = new LinkedList<>();
+
         Location start = findRat(maze);
         seen.add(start);
+        prev.put(start, null);
         while(!seen.isEmpty()){
             Location current = seen.remove();
             if(visited.contains(current)) continue;
             visited.add(current);
-            if(maze[current.row()][current.column()] == 'c') return new int[] {current.row(), current.column()};
+            if(maze[current.row()][current.column()] == 'c'){
+                //return new int[] {current.row(), current.column()};
+                Location step = current;
+                while(step != null){
+                    path.addFirst(step);
+                    step = prev.get(step);
+                }   
+                return path;
+            } 
             //seen.addAll(possibleMoves(maze, current));
-            for(Location neighbor : possibleMoves(maze, current)) seen.add(neighbor);
+            for(Location neighbor : possibleMoves(maze, current)){
+                if(!prev.keySet().contains(neighbor)){
+                    prev.put(neighbor, current);
+                    seen.add(neighbor);
+                }
+            } 
 
         }
         throw new HungryRatException();
